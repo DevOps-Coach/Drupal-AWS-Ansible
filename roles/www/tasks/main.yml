@@ -1,0 +1,8 @@
+---
+
+- include: setup.yml
+- include: db_create.yml
+- include: deploy.yml
+- include: s3fs.yml
+- include: drush.yml
+- include: drupal_install.yml

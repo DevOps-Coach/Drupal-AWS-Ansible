@@ -1,0 +1,35 @@
+---
+
+- name: Drop DB
+  mysql_db:
+    db: "{{ drupal_db_name }}"
+    state: absent
+    login_user: "{{ db_admin_username }}"
+    login_password: "{{ db_admin_password }}"
+    login_host: "{{ rds_endpoint }}"
+  run_once: true
+  when: "{{ drop_database | default(False) }}"
+
+- name: Create DB
+  mysql_db:
+    db: "{{ drupal_db_name }}"
+    state: present
+    login_user: "{{ db_admin_username }}"
+    login_password: "{{ db_admin_password }}"
+    login_host: "{{ rds_endpoint }}"
+  run_once: true
+  register: create_db
+
+- name: Create MySQL user for Drupal.
+  mysql_user:
+    name: "{{ drupal_db_user }}"
+    host: "{{ item }}"
+    priv: "{{ drupal_db_name }}.*:ALL"
+    password: "{{ drupal_db_password }}"
+    login_user: "{{ db_admin_username }}"
+    login_password: "{{ db_admin_password }}"
+    login_host: "{{ rds_endpoint }}"
+  with_items:
+    - "172.22.1.%"
+    - "172.22.2.%"
+  run_once: true

@@ -1,0 +1,43 @@
+---
+
+- include: validate.yml
+
+- name: Deploy Drupal
+  hosts: tag_role_www
+#  serial: "50%"
+  user: ubuntu
+  sudo: yes
+  vars_files:
+    - group_vars/vault.yml
+  roles:
+    - { role: www, rds_endpoint: "{{ groups.rds[0] }}" }
+
+- name: Add www instances to elb
+  hosts: tag_role_www
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Gather ec2 facts
+      action: ec2_facts
+    - name: Adding instances
+      ec2_elb:
+        ec2_elbs: drupal-elb
+        instance_id: "{{ ec2_id }}"
+        state: present
+        region: "{{ aws_region }}"
+        wait: yes
+        wait_timeout: 500
+      register: elb
+
+- name: ELB hostname
+  hosts: localhost
+  connection: local
+  tasks:
+   - action:
+       module: ec2_elb_facts
+       names: drupal-elb
+       region: "{{ aws_region }}"
+     register: elb_facts
+   - action:
+       module: debug
+       msg: "Create a CNAME record on your domain pointing to {{ elb_facts.elbs[0].dns_name }}"

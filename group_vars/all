@@ -1,0 +1,53 @@
+---
+
+# unique all lowercase string appended to S3 bucket for uniqueness
+# e.g. unique: 5av2ixmk2hf
+# unique:
+
+# Region to deploy in
+# NOTE: If you change this, modify <regions> in inventory/ec2.ini to your needs
+aws_region: us-east-1
+
+# RDS
+db_instance_type: db.t2.micro
+rds_subnet_group_name: drupal-sub-group
+
+# EC2
+drupal_instance_size: t2.micro
+
+# instances are launched in 2 total AZs (2 * drupal_instance_per_az = total www servers)
+drupal_instance_per_az: 2
+
+# AMI used for www instances
+ami_id: ami-20d3fc4a # Ubuntu 14.04.2 LTS
+
+# location to save ssh key created by vpc playbook
+# NOTE: If you change this, modify <private_key_file> in ansible.cfg to your needs
+ssh_private_key_file: "~/.ssh/aws_key.pem"
+
+# SSL cert ID created manually with AWS Certificate Manager
+# e.g. ssl_cert_id: "arn:aws:acm:us-east-1:55555555555:certificate/55555555-5555-5555-5555-555555555555"
+# ssl_cert_id:
+
+# DB Admin creds
+db_admin_username: root
+db_admin_password: "{{ vault_db_admin_password }}"
+
+# Repo to clone code from
+repo_url: https://github.com/drupal/drupal.git
+drupal_version: 7.x
+
+www_root: /var/www/drupal
+
+# Drupal info
+drupal_db_name: drupal
+drupal_db_user: drupal
+drupal_db_password: "{{ vault_drupal_db_password }}"
+
+# e.g. dupal_hash_salt: "K1pBc5AV2ixmk2hfz6X4WHlQq6rc9hRbsAp560MjRJrwlrbPw7bqIOlT-ji6ZRL645gomyXqSQ"
+#drupal_hash_salt:
+
+drupal_install_profile: minimal
+drupal_site_name: "High Availability Drupal in AWS"
+drupal_admin_user: admin
+drupal_admin_password: "{{ vault_drupal_admin_password }}"

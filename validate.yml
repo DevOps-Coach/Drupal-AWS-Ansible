@@ -1,0 +1,20 @@
+---
+
+- name: Verify variables are set
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - group_vars/vault.yml
+  tasks:
+    - fail: msg="Variable '{{ item }}' is not defined"
+      when: item is not defined
+      with_items:
+        - "{{ unique }}"
+        - "{{ db_admin_username }}"
+        - "{{ db_admin_password }}"
+        - "{{ drupal_hash_salt }}"
+        - "{{ drupal_admin_user }}"
+        - "{{ drupal_admin_password }}"
+        - "{{ ssl_cert_id }}"
+      no_log: true

@@ -1,0 +1,19 @@
+---
+
+- name: Install Drupal.
+  command: >
+    drush -y si -y {{ drupal_install_profile }}
+    --site-name="{{ drupal_site_name }}"
+    --account-name="{{ drupal_admin_user }}"
+    --account-pass="{{ drupal_admin_password }}"
+    --root="{{ www_root }}"
+  args:
+    chdir: "{{ www_root }}"
+  when: "inventory_hostname == groups.tag_role_www[0] and create_db.changed"
+
+- name: Ensure settings.php has proper permissions.
+  file:
+    path: "{{ www_root }}/sites/default/settings.php"
+    mode: 0444
+  notify: restart apache
+

@@ -1,0 +1,17 @@
+---
+
+- name: Get Drush
+  get_url:
+    url: "http://files.drush.org/drush.phar"
+    dest: /tmp/drush.phar
+    force: yes
+    mode: 0555
+
+- name: Test Drush
+  command: php /tmp/drush.phar core-status
+  register: drush
+
+- name: Move Drush to path
+  sudo: yes
+  command: mv /tmp/drush.phar /usr/local/bin/drush
+  when: "drush.rc == 0"

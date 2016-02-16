@@ -1,0 +1,8 @@
+---
+
+- include: vpc.yml
+- include: s3.yml
+- include: iam.yml
+- include: rds.yml
+- include: elb.yml
+- include: ec2.yml

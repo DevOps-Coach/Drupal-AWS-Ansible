@@ -1,0 +1,45 @@
+---
+
+- name: Get S3FS
+  copy:
+    src: s3fs_1-1_amd64.deb
+    dest: /tmp/s3fs_1-1_amd64.deb
+
+- name: Install S3FS
+  apt:
+    deb: /tmp/s3fs_1-1_amd64.deb
+
+- name: S3FS cache dir
+  file:
+    dest: /tmp/s3fs-cache
+    state: directory
+
+- name: Stat S3FS mount dir
+  stat:
+    path: /mnt/drupal
+  register: stat_s3
+
+- name: S3FS mount dir
+  file:
+    dest: /mnt/drupal
+    state: directory
+    owner: www-data
+    group: www-data
+  when: not stat_s3.stat.exists
+
+  # unmount so mount won't fail on subsequent runs
+- name: Unmount S3 bucket
+  command: fusermount -u /mnt/drupal
+  ignore_errors: yes # don't care if it's actually not mounted
+  when: stat_s3.stat.exists
+
+- name: Mount S3 bucket
+  command: "/usr/bin/s3fs -o nonempty,use_cache=/tmp/s3fs-cache,gid=33,uid=33,iam_role=drupal-bucket drupal-{{ unique }} /mnt/drupal"
+
+- name: Create S3 symlinks
+  file:
+    force: yes
+    src: /mnt/drupal/
+    dest: /var/www/drupal/sites/default/files
+    state: link
+    owner: www-data

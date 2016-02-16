@@ -1,0 +1,6 @@
+---
+
+- name: Create S3 bucket
+  s3_bucket:
+    name: "drupal-{{ unique }}"
+    state: present

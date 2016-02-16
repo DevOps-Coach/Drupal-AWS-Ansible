@@ -1,0 +1,16 @@
+---
+
+- name: Create IAM role
+  iam:
+    iam_type: role
+    name: "drupal-bucket"
+    state: present
+
+- name: Add policy to IAM role
+  iam_policy:
+    iam_type: role
+    iam_name: "drupal-bucket"
+    policy_name: "DrupalBucketFullAccess"
+    policy_json: "{{ lookup( 'template', 's3_policy.json.j2',convert_data=False) }}"
+    region: "{{ aws_region }}"
+    state: present

@@ -1,0 +1,72 @@
+---
+
+- name: VPC setup
+  ec2_vpc:
+    state: present
+    region: "{{ aws_region }}"
+    cidr_block: 172.22.0.0/16
+    resource_tags: { "Environment":"Development" }
+    subnets:
+      - cidr: 172.22.1.0/24
+        az: "{{ aws_region }}c"
+        resource_tags: { "Environment":"Dev" }
+      - cidr: 172.22.2.0/24
+        az: "{{ aws_region }}b"
+        resource_tags: { "Environment":"Dev" }
+    internet_gateway: True
+    route_tables:
+      - subnets:
+          - 172.22.2.0/24
+          - 172.22.1.0/24
+        routes:
+          - dest: 0.0.0.0/0
+            gw: igw
+  register: vpc
+
+- name: Setup drupal security group
+  ec2_group:
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    region: "{{ aws_region }}"
+    name: drupal
+    description: drupal security group
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: all
+        group_name: drupal
+  register: drupal_group
+
+- name: Setup edge security group
+  ec2_group:
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    region: "{{ aws_region }}"
+    name: edge
+    description: edge security group
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0
+      - proto: all
+        group_name: edge
+  register: edge_group
+
+- name: ssh key pair
+  local_action:
+    module: ec2_key
+    state: present
+    name: drupal-testing
+    region: "{{ aws_region }}"
+  register: key
+
+- name: Save private key
+  copy: content="{{ key.key.private_key }}" dest="{{ ssh_private_key_file }}" mode=0600
+  when: key.changed

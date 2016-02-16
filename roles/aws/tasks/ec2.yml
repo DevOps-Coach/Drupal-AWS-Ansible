@@ -1,0 +1,45 @@
+---
+
+- name: EC2 instances in first az
+  ec2:
+    key_name: "{{ key.key.name }}"
+    instance_type: "{{ drupal_instance_size }}"
+    image: "{{ ami_id }}"
+    region: "{{ aws_region }}"
+    instance_profile_name: drupal-bucket
+    wait: yes
+    count_tag:
+      environment: Dev
+      zone: 1
+    exact_count: "{{ drupal_instance_per_az }}"
+    instance_tags:
+      role: www
+      environment: Dev
+      zone: 1
+    group_id: "{{ drupal_group.group_id }}"
+    monitoring: no
+    vpc_subnet_id: "{{ vpc.subnets[0].id }}"
+    assign_public_ip: yes
+  register: www_1
+
+- name: EC2 instances in second az
+  ec2:
+    key_name: "{{ key.key.name }}"
+    instance_type: "{{ drupal_instance_size }}"
+    image: "{{ ami_id }}"
+    region: "{{ aws_region }}"
+    instance_profile_name: drupal-bucket
+    wait: yes
+    count_tag:
+      environment: Dev
+      zone: 2
+    exact_count: "{{ drupal_instance_per_az }}"
+    instance_tags:
+      role: www
+      environment: Dev
+      zone: 2
+    group_id: "{{ drupal_group.group_id }}"
+    monitoring: no
+    vpc_subnet_id: "{{ vpc.subnets[1].id }}"
+    assign_public_ip: yes
+  register: www_2

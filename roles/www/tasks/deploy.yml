@@ -1,0 +1,19 @@
+---
+
+- name: Checkout Drupal code
+  git:
+    repo : "{{ repo_url }}"
+    dest: "{{ www_root }}"
+    version: "{{ drupal_version }}"
+    clone: yes
+
+- stat: path="{{ www_root }}/sites/default/settings.php"
+  register: st
+
+- name: Populate settings.php
+  template:
+    src: settings.php.j2
+    dest: "{{ www_root }}/sites/default/settings.php"
+    owner: www-data
+    group: www-data
+    mode: 0600

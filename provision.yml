@@ -1,0 +1,12 @@
+---
+
+- include: validate.yml
+
+- name: Provision AWS infrustructure
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - group_vars/vault.yml
+  roles:
+    - aws
