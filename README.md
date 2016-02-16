@@ -57,27 +57,28 @@ drupal_hash_salt:
 
 NOTE: If you've encrypted your vault.yml file. Include ``--ask-vault-pass`` to all playbook commands. Or alternatively setup a password file as described [here](http://docs.ansible.com/ansible/playbooks_vault.html#running-a-playbook-with-vault).
 
-1. Run the provision.yml playbook to setup your AWS resources:
+Run the provision.yml playbook to setup your AWS resources:
 ```
 ansible-playbook provision.yml
 ```
 
 NOTE: The provision.yml playbook does several things including creating a Multi-AZ RDS instance. These instances take several minutes before they become available. So make sure the drupal-dev RDS instance is available before proceeding.
 
-2. Run the deploy.yml playbook to setup and install Drupal:
+Run the deploy.yml playbook to setup and install Drupal:
 ```
 ansible-playbook deploy.yml
 ```
 
 After execution the playbook will display the hostname of the AWS Elastic Load Balancer.
 
-3. Create a CNAME record on the domain you used when creating the SSL certificate with AWS Certificate Manager pointed to the DNS name of the ELB.
+Create a CNAME record on the domain you used when creating the SSL certificate with AWS Certificate Manager pointed to the DNS name of the ELB.
 
 That's it. You should now have a high availability Drupal site. Visit your domain name and login with the admin credentials you defined in the variable files.
 
 If you'd like to deploy Drupal again with a fresh database. You can pass in a variable to drop the current database during the deploy::
 ```bash
 ansible-playbook deploy.yml --extra-vars "{'drop_database': True}"
+```
 
 # TODO
 * Replace S3 with GlusterFS or similar solution to avoid performance and "eventual consistency" issues with S3 buckets.
